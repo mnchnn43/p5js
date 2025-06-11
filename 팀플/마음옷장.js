@@ -7,6 +7,7 @@ let cnt = 0;
 let clothIndex = 0;
 let fadeFrame = 0;
 let fadeDuration = 60;
+let slideInterval = null;
 
 function preload(){
     mouseDefault = loadImage('images/mouseDefault.png');
@@ -59,25 +60,67 @@ function preload(){
     repairSlide = loadImage('images/repairSlide.png');
     endingCredit1 = loadImage('images/endingCredit1.png');
     endingCredit2 = loadImage('images/endingCredit2.png');
+    endingCredit3 = loadImage('images/endingCredit3.png');
     ban = loadImage('images/ban.png');
 
     dummy = loadImage('images/dummyData.png');
 }
 
 function setup(){
-    createCanvas(780, 780);
+    let canvas = createCanvas(780, 780);
+    let x = (windowWidth - width) / 2;
+    let y = (windowHeight - height) / 2;
+    canvas.position(x, y);
+
     mouseUI = [mouseDefault, mouseSew, mouseHand, mouseGrab];
-    slideImage = [closetClosed1, onHeart, closetOpened, onDump, onRepair, canOpened, closetClosed3, endingCredit1, endingCredit2, repairSlide, dummy];
+    slideImage = [
+        closetClosed1, // 0
+        onHeart,       // 1
+        closetOpened,  // 2
+        onDump,        // 3
+        onRepair,      // 4
+        canOpened,     // 5
+        closetClosed2, // 6
+        closetClosed3, // 7
+        endingCredit1, // 8
+        endingCredit2, // 9
+        endingCredit3, // 10
+        repairSlide,   // 11
+        dummy          // 12
+    ];
     LR = [left, right, onLeft, onRight];
     closeButton = [close0, close1];
-    clothController = [[true, true, false, false], [true, false, true, 0], [true, true, false, false], [true, false, true, 0], [true, true, false, false], [true, false, false, 0], 0, [true, false, false, 0], 0, [true, false, false, 0]];
-    textImage = [anxietyText, grudgeText, lethargyText, obsessText, regretText, anxietyRepairedText, 0, lethargyRepairedText, 0, regretRepairedText];
-    clothImage = [anxietyCloth, grudgeCloth, lethargyCloth, obsessCloth, regretCloth, anxietyRepairedCloth, 0, lethargyRepairedCloth, 0, regretRepairedCloth, onGrudge, 0, onObsess];
+    clothController = [
+        [true, true, false, false], [true, false, true, 0], [true, true, false, false], [true, false, true, 0], [true, true, false, false],
+        [true, false, false, 0], 0, [true, false, false, 0], 0, [true, false, false, 0]
+    ];
+    textImage = [
+        anxietyText, grudgeText, lethargyText, obsessText, regretText,
+        anxietyRepairedText, 0, lethargyRepairedText, 0, regretText
+    ];
+    clothImage = [
+        anxietyCloth, grudgeCloth, lethargyCloth, obsessCloth, regretCloth,
+        anxietyRepairedCloth, 0, lethargyRepairedCloth, 0, regretRepairedCloth,
+        onGrudge, 0, onObsess
+    ];
     currentSlide = 0;
+}
+
+function updateSlideInterval() { // 인공지능 사용
+    if ((currentSlide === 6 || currentSlide === 7) && !slideInterval) {
+        slideInterval = setInterval(() => {
+            if (currentSlide === 6) currentSlide = 7;
+            else if (currentSlide === 7) currentSlide = 6;
+        }, 500);
+    } else if (!(currentSlide === 6 || currentSlide === 7) && slideInterval) {
+        clearInterval(slideInterval);
+        slideInterval = null;
+    }
 }
 
 function draw(){
     background(220);
+    updateSlideInterval();
     drawMainImage();
     drawLR();
     drawExtraUI();
@@ -88,7 +131,7 @@ function draw(){
 
 function drawMainImage(){
     imageMode(CENTER);
-    if (currentSlide !== 7){
+    if (currentSlide !== 8){
         image(slideImage[currentSlide], 400, 400, slideImage[currentSlide].width/2.5, slideImage[currentSlide].height/2.5);
     }  
 
@@ -116,7 +159,7 @@ function drawMainImage(){
         currentSlide = 2;
     } // 쓰레기통
 
-    else if (currentSlide == 7){
+    else if (currentSlide == 8){ 
         image(slideImage[currentSlide], 370, 350, slideImage[currentSlide].width/2, slideImage[currentSlide].height/2);
     }
 
@@ -171,7 +214,7 @@ function drawCloth(){
         }
     }
 
-    if (currentSlide == 9){
+    if (currentSlide == 11){
         image(clothImage[clothIndex], 450, 600, clothImage[clothIndex].width *2, clothImage[clothIndex].height *2);
     }
 }
@@ -193,7 +236,7 @@ function drawMouseUI(){
     }
 }
 
-function drawFadeEffect() { // 인공지능으로 작성
+function drawFadeEffect() {
     if (isFading) {
         let half = fadeDuration / 2;
         let alpha;
@@ -211,12 +254,14 @@ function drawFadeEffect() { // 인공지능으로 작성
             if (currentSlide == 0 || currentSlide == 1){
                 currentSlide = 2; 
             } else if ((currentSlide >= 2 && currentSlide <= 5)){
-                currentSlide = cnt > 4 ? 6 : 9;
-            } else if (currentSlide == 6){
-                currentSlide = 7;
-            } else if (currentSlide == 7){
+                currentSlide = cnt > 4 ? 6 : 11;
+            } else if (currentSlide == 6 || currentSlide == 7){
                 currentSlide = 8;
+            } else if (currentSlide == 8){
+                currentSlide = 9;
             } else if (currentSlide == 9){
+                currentSlide = 10;
+            } else if (currentSlide == 11){
                 currentSlide = 2;
             }
         }
@@ -272,16 +317,20 @@ function mousePressed(){
         isDragging = true;
     }
 
-    if (currentSlide == 6){
+    if (currentSlide == 6 || currentSlide == 7){
         isFading = true;
         fadeFrame = 0;
     }
-    if (currentSlide == 7){
+    if (currentSlide == 8){
+        isFading = true;
+        fadeFrame = 0;
+    }
+    if (currentSlide == 9){
         isFading = true;
         fadeFrame = 0;
     }
 
-    if (currentSlide == 9){
+    if (currentSlide == 11){
         isSewing = false;
         cnt += 1;
         clothController[clothIndex][3] = true;
@@ -299,7 +348,7 @@ function mouseReleased(){
     isDragging = false;
 }
 
-function keyPressed(){ // 인공지능으로 작성
+function keyPressed(){
     if (keyCode == 27) { // ESC 키를 누르면
         if (currentSlide >= 2 && currentSlide <= 5 && cnt > 4){
             isFading = true;
@@ -320,10 +369,10 @@ function keyPressed(){ // 인공지능으로 작성
     }
 
     if (keyCode === 32) {
-        if (currentSlide == 0 || currentSlide == 1 || currentSlide == 6 || currentSlide == 7) {
+        if (currentSlide == 0 || currentSlide == 1 || currentSlide == 6 || currentSlide == 7 || currentSlide == 8 || currentSlide == 9) {
             isFading = true;
             fadeFrame = 0;
-        } else if (currentSlide == 9) {
+        } else if (currentSlide == 11) {
             isSewing = false;
             cnt += 1;
             clothController[clothIndex][3] = true;
@@ -331,5 +380,16 @@ function keyPressed(){ // 인공지능으로 작성
             isFading = true;
             fadeFrame = 0;
         }
+    }
+}
+
+function windowResized() { // 인공지능 사용
+    let x = (windowWidth - width) / 2;
+    let y = (windowHeight - height) / 2;
+    let canvas = document.getElementsByTagName('canvas')[0];
+    if (canvas) {
+        canvas.style.position = 'absolute';
+        canvas.style.left = `${x}px`;
+        canvas.style.top = `${y}px`;
     }
 }
