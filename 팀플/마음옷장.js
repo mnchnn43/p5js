@@ -96,7 +96,7 @@ function setup(){
     ];
     textImage = [
         anxietyText, grudgeText, lethargyText, obsessText, regretText,
-        anxietyRepairedText, 0, lethargyRepairedText, 0, regretText
+        anxietyRepairedText, 0, lethargyRepairedText, 0, regretRepairedText
     ];
     clothImage = [
         anxietyCloth, grudgeCloth, lethargyCloth, obsessCloth, regretCloth,
